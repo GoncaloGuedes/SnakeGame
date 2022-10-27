@@ -56,13 +56,13 @@ class Snake(object):
             self.direction = Direction.RIGHT
     
     def movement(self):
-        if self.direction == Direction.UP:
+        if self.direction == Direction.UP and self.rect.y > 0:
             self.rect.move_ip(0, -BLOCK_SIZE)
-        elif self.direction == Direction.DOWN:
+        elif self.direction == Direction.DOWN and self.rect.y < HEIGHT-BLOCK_SIZE:
             self.rect.move_ip(0, BLOCK_SIZE)
-        elif self.direction == Direction.LEFT:
+        elif self.direction == Direction.LEFT and self.rect.x > 0:
             self.rect.move_ip(-BLOCK_SIZE, 0)
-        elif self.direction == Direction.RIGHT:
+        elif self.direction == Direction.RIGHT and self.rect.x < WIDTH-BLOCK_SIZE:
             self.rect.move_ip(BLOCK_SIZE, 0)
 
     def draw(self, surface):
