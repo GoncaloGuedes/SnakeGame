@@ -36,21 +36,28 @@ class Snake(object):
         x = random.randrange(0, WIDTH, BLOCK_SIZE)
         y = random.randrange(0, HEIGHT, BLOCK_SIZE)
         self.rect = pygame.rect.Rect((x, y, BLOCK_SIZE, BLOCK_SIZE))
+        self.direction = "UP"
 
     def handle_keys(self, event):
         if event.key == K_w:
-            self.rect.move_ip(0, -BLOCK_SIZE)
+            self.direction = "UP"
         elif event.key == K_s:
-            self.rect.move_ip(0, BLOCK_SIZE)
+            self.direction = "DOWN"
         elif event.key == K_a: 
-            self.rect.move_ip(-BLOCK_SIZE, 0)
+            self.direction = "LEFT"
         elif event.key == K_d: 
-            self.rect.move_ip(BLOCK_SIZE, 0)
+            self.direction = "RIGHT"
     
     def movement(self):
-        self.rect.move_ip(0, -BLOCK_SIZE)
-
-
+        if self.direction == "UP":
+            self.rect.move_ip(0, -BLOCK_SIZE)
+        elif self.direction == "DOWN":
+            self.rect.move_ip(0, BLOCK_SIZE)
+        elif self.direction == "LEFT":
+            self.rect.move_ip(-BLOCK_SIZE, 0)
+        elif self.direction == "RIGHT":
+            self.rect.move_ip(BLOCK_SIZE, 0)
+            
     def draw(self, surface):
         pygame.draw.rect(surface, (0, 0, 128), self.rect)
 
@@ -60,6 +67,7 @@ if __name__ == "__main__":
 
     running = True
     while running:
+        snake.movement()
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
@@ -72,5 +80,5 @@ if __name__ == "__main__":
         snake.draw(surface)
         pygame.display.update()
 
-        CLOCK.tick(1)
+        CLOCK.tick(10)
     pygame.quit()
