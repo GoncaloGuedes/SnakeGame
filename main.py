@@ -1,59 +1,76 @@
-from socketserver import DatagramRequestHandler
-from tarfile import BLOCKSIZE
-import pygame
+from random import random
 import random
+import pygame
+from pygame.locals import *
 
 pygame.init()
 
-
-# Variables 
-WIDTH = 600
-HEIGHT = 400
-BLOCKSIZE = 20 #Set the size of the grid block
+# * Variables
+WIDTH = 500
+HEIGHT = 500
+BLOCK_SIZE = 20
+RED = (255, 0, 0)
+GRAY = (150, 150, 150)
 BLACK = (0, 0, 0)
-WHITE = (200, 200, 200)
+WHITE = (255, 255, 255)
 
-# Setup Game
-pygame.display.set_caption("SnakeGame!")
-WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Snake Game!")
+surface = pygame.display.set_mode((WIDTH, HEIGHT))
+surface.fill(BLACK)
 
 
+def draw_grid():
+    for x in range(0, WIDTH, BLOCK_SIZE):
+        for y in range(0, HEIGHT, BLOCK_SIZE):
+            rect = Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
+            pygame.draw.rect(surface, WHITE, rect, 1)
 
 def spawn_fruit():
-    COLOR = (255, 0, 0)
-    x = random.randrange(0, WIDTH, BLOCKSIZE)
-    y = random.randrange(0, HEIGHT, BLOCKSIZE)
+    x = random.randrange(0, WIDTH, BLOCK_SIZE)
+    y = random.randrange(0, HEIGHT, BLOCK_SIZE)
+    fruit = Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
+    pygame.draw.rect(surface, RED, fruit) 
+ 
+class Snake(object):
+    def __init__(self):
+        x = random.randrange(0, WIDTH, BLOCK_SIZE)
+        y = random.randrange(0, HEIGHT, BLOCK_SIZE)
+        self.rect = pygame.rect.Rect((x, y, BLOCK_SIZE, BLOCK_SIZE))
 
-    #! Não pode dar spawn em cima do corpo da cobra
-
-    fruit = pygame.Rect(x, y, BLOCKSIZE, BLOCKSIZE)
-    pygame.draw.rect(WINDOW, COLOR, fruit)
-        
-
-def drawGrid(): 
-    for x in range(0, WIDTH, BLOCKSIZE):
-        for y in range(0, HEIGHT, BLOCKSIZE):
-            rect = pygame.Rect(x, y, BLOCKSIZE, BLOCKSIZE)
-            pygame.draw.rect(WINDOW, WHITE, rect, 1)
+    def handle_keys(self, event):
+        if event.key == K_w:
+            self.rect.move_ip(0, -BLOCK_SIZE)
+        elif event.key == K_s:
+            self.rect.move_ip(0, BLOCK_SIZE)
+        elif event.key == K_a: 
+            self.rect.move_ip(-BLOCK_SIZE, 0)
+        elif event.key == K_d: 
+            self.rect.move_ip(BLOCK_SIZE, 0)
     
+    def movement(self):
+        self.rect.move_ip(0, -BLOCK_SIZE)
 
-def main():
-    CLOCK = pygame.time.Clock()
-    running = True
-    while running:
-        drawGrid()
-        spawn_fruit()
 
-        # Se a cabeça da cobra está na mesma posição que a fruta, a posição da fruta atualiza
-        # Se a cabeça toda na cobra, acaba
-        # Se a cabeça toda na parede, acaba
-        # Se come uma fruta, aumneta 1 bloco de tamanho e aumenta a velocidade
-        # Atualiza o Score
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        pygame.display.update()
-    pygame.quit()
+    def draw(self, surface):
+        pygame.draw.rect(surface, (0, 0, 128), self.rect)
 
 if __name__ == "__main__":
-    main()
+    snake = Snake()
+    CLOCK = pygame.time.Clock()
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                running = False
+                break
+            elif event.type == KEYDOWN:
+                snake.handle_keys(event)
+
+        surface.fill(GRAY)
+        draw_grid()
+        snake.draw(surface)
+        pygame.display.update()
+
+        CLOCK.tick(1)
+    pygame.quit()
