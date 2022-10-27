@@ -1,4 +1,5 @@
 from random import random
+from enum import Enum
 import random
 import pygame
 from pygame.locals import *
@@ -30,34 +31,40 @@ def spawn_fruit():
     y = random.randrange(0, HEIGHT, BLOCK_SIZE)
     fruit = Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
     pygame.draw.rect(surface, RED, fruit) 
+
+class Direction(Enum):
+    UP = 1
+    DOWN = 2
+    LEFT = 3
+    RIGHT= 4
  
 class Snake(object):
     def __init__(self):
         x = random.randrange(0, WIDTH, BLOCK_SIZE)
         y = random.randrange(0, HEIGHT, BLOCK_SIZE)
         self.rect = pygame.rect.Rect((x, y, BLOCK_SIZE, BLOCK_SIZE))
-        self.direction = "UP"
+        self.direction = Direction.UP
 
     def handle_keys(self, event):
         if event.key == K_w:
-            self.direction = "UP"
+            self.direction = Direction.UP
         elif event.key == K_s:
-            self.direction = "DOWN"
+            self.direction = Direction.DOWN
         elif event.key == K_a: 
-            self.direction = "LEFT"
+            self.direction = Direction.LEFT
         elif event.key == K_d: 
-            self.direction = "RIGHT"
+            self.direction = Direction.RIGHT
     
     def movement(self):
-        if self.direction == "UP":
+        if self.direction == Direction.UP:
             self.rect.move_ip(0, -BLOCK_SIZE)
-        elif self.direction == "DOWN":
+        elif self.direction == Direction.DOWN:
             self.rect.move_ip(0, BLOCK_SIZE)
-        elif self.direction == "LEFT":
+        elif self.direction == Direction.LEFT:
             self.rect.move_ip(-BLOCK_SIZE, 0)
-        elif self.direction == "RIGHT":
+        elif self.direction == Direction.RIGHT:
             self.rect.move_ip(BLOCK_SIZE, 0)
-            
+
     def draw(self, surface):
         pygame.draw.rect(surface, (0, 0, 128), self.rect)
 
