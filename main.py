@@ -1,3 +1,4 @@
+from calendar import leapdays
 from pickle import TRUE
 from random import random
 from enum import Enum
@@ -29,6 +30,42 @@ FONT = pygame.font.Font('freesansbold.ttf', 32)
 FRUIT_IMG = pygame.image.load('./Graphics/apple.png')
 FRUIT_IMG = pygame.transform.scale(FRUIT_IMG, (BLOCK_SIZE, BLOCK_SIZE))
 
+# Heads
+HEAD_RIGHT = pygame.image.load('./Graphics/head_right.png')
+HEAD_RIGHT = pygame.transform.scale(HEAD_RIGHT, (BLOCK_SIZE, BLOCK_SIZE))
+HEAD_LEFT = pygame.image.load('./Graphics/head_left.png')
+HEAD_LEFT= pygame.transform.scale(HEAD_LEFT, (BLOCK_SIZE, BLOCK_SIZE))
+HEAD_UP = pygame.image.load('./Graphics/head_up.png')
+HEAD_UP= pygame.transform.scale(HEAD_UP, (BLOCK_SIZE, BLOCK_SIZE))
+HEAD_DOWN = pygame.image.load('./Graphics/head_down.png')
+HEAD_DOWN= pygame.transform.scale(HEAD_DOWN, (BLOCK_SIZE, BLOCK_SIZE))
+
+# Bodies 
+BODY_BOTTOM_LEFT = pygame.image.load('./Graphics/body_bottomleft.png')
+BODY_BOTTOM_LEFT = pygame.transform.scale(BODY_BOTTOM_LEFT, (BLOCK_SIZE, BLOCK_SIZE))
+BODY_BOTTOM_RIGHT = pygame.image.load('./Graphics/body_bottomright.png')
+BODY_BOTTOM_RIGHT = pygame.transform.scale(BODY_BOTTOM_RIGHT, (BLOCK_SIZE, BLOCK_SIZE))
+
+BODY_TOP_LEFT = pygame.image.load('./Graphics/body_topleft.png')
+BODY_TOP_LEFT = pygame.transform.scale(BODY_TOP_LEFT, (BLOCK_SIZE, BLOCK_SIZE))
+BODY_TOP_RIGHT = pygame.image.load('./Graphics/body_topright.png')
+BODY_TOP_RIGHT = pygame.transform.scale(BODY_TOP_RIGHT, (BLOCK_SIZE, BLOCK_SIZE))
+
+BODY_HORIZONTAL = pygame.image.load('./Graphics/body_horizontal.png')
+BODY_HORIZONTAL = pygame.transform.scale(BODY_HORIZONTAL, (BLOCK_SIZE, BLOCK_SIZE))
+BODY_VERTICAL = pygame.image.load('./Graphics/body_vertical.png')
+BODY_VERTICAL = pygame.transform.scale(BODY_VERTICAL, (BLOCK_SIZE, BLOCK_SIZE))
+
+# Tails
+TAIL_RIGHT = pygame.image.load('./Graphics/tail_right.png')
+TAIL_RIGHT = pygame.transform.scale(TAIL_RIGHT, (BLOCK_SIZE, BLOCK_SIZE))
+TAIL_LEFT = pygame.image.load('./Graphics/tail_left.png')
+TAIL_LEFT= pygame.transform.scale(TAIL_LEFT, (BLOCK_SIZE, BLOCK_SIZE))
+TAIL_UP = pygame.image.load('./Graphics/tail_up.png')
+TAIL_UP= pygame.transform.scale(TAIL_UP, (BLOCK_SIZE, BLOCK_SIZE))
+TAIL_DOWN = pygame.image.load('./Graphics/tail_down.png')
+TAIL_DOWN= pygame.transform.scale(TAIL_DOWN, (BLOCK_SIZE, BLOCK_SIZE))
+
 
 pygame.display.set_caption("Snake Game!")
 CLOCK = pygame.time.Clock()
@@ -41,6 +78,7 @@ def draw_grid():
             pygame.draw.rect(surface, WHITE, rect, 1)
 
 Positions = namedtuple("Positions" , 'x, y')
+BodyOrientation = namedtuple("BodyOrientation", 'x, y')
 class Direction(Enum):
     UP = 1
     DOWN = 2
@@ -57,7 +95,7 @@ class Snake(object):
         self.snake = [self.head]
         self.direction = Direction.RIGHT
         # Fruit
-        self.fruit = None
+        self.fruit = Positions(0, 0)
         self._place_food()
 
         # Game Status
@@ -114,17 +152,47 @@ class Snake(object):
         if self.fruit in self.snake:
             self._place_food()
 
+    def _draw_snake(self):
+        HEAD_IMAGES = {
+            Direction.RIGHT: HEAD_RIGHT,
+            Direction.LEFT: HEAD_LEFT,
+            Direction.UP: HEAD_UP,
+            Direction.DOWN: HEAD_DOWN
+        }
+
+        TAIL_IMAGES = {
+            (0, -1): TAIL_UP,
+            (0, 1): TAIL_DOWN,
+            (-1, 0): TAIL_LEFT,
+            (1, 0): TAIL_RIGHT
+        }
+        for index, pt in enumerate(self.snake):
+            print(index)
+            rect_snake = Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE)
+            if index == 0:
+                surface.blit(HEAD_IMAGES[self.direction], rect_snake)
+            elif index == len(self.snake)-1: # Add tail
+                vector = ((pt.x-self.snake[index-1].x)// BLOCK_SIZE,
+                          (pt.y-self.snake[index-1].y)//BLOCK_SIZE)
+                print(vector)
+                surface.blit(TAIL_IMAGES[vector], rect_snake)
+            else:
+                # TODO: Ver o bloco anterior e posterior
+                # TODO: Se X for o mesmo é Horizoltal
+                # TODO: Se y for o mesmo é vertical
+                pygame.draw.rect(surface, GREEN, rect_snake)
+
+                
+
     def _update_ui(self):
         surface.fill(GREEN_DARKER)
 
         # Update Score label 
-        score_label = FONT.render(f"Score: {self.score}", TRUE, WHITE)
+        score_label = FONT.render(f"Score: {self.score}", True, WHITE)
         surface.blit(score_label, [0, 0])
 
         # Draw Snake
-        for pt in self.snake:
-            rect_snake = Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE)
-            pygame.draw.rect(surface, RED, rect_snake)
+        self._draw_snake()
         
         # Draw Fruit
         rect_fruit = Rect(self.fruit.x, self.fruit.y, BLOCK_SIZE, BLOCK_SIZE)
@@ -153,7 +221,7 @@ class Snake(object):
         self._update_ui()
 
         if self.game_over:
-            game_over_label = FONT.render(f"GAME OVER!! Score: {self.score}", TRUE, WHITE)
+            game_over_label = FONT.render(f"GAME OVER!! Score: {self.score}", True, WHITE)
             surface.blit(game_over_label, (WIDTH/2 -game_over_label.get_width()/2,
                                            HEIGHT/2 - game_over_label.get_height()/2))
             pygame.display.update()
