@@ -1,4 +1,5 @@
 from calendar import leapdays
+from email.quoprimime import body_check
 from pickle import TRUE
 from random import random
 from enum import Enum
@@ -19,7 +20,7 @@ BLOCK_SIZE = 20
 # Colors
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-GREEN_DARKER = (28, 199, 16)
+GREEN_DARKER = (175, 215, 70)
 GRAY = (150, 150, 150)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -72,10 +73,12 @@ CLOCK = pygame.time.Clock()
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def draw_grid():
-    for x in range(0, WIDTH, BLOCK_SIZE):
-        for y in range(0, HEIGHT, BLOCK_SIZE):
-            rect = Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
-            pygame.draw.rect(surface, WHITE, rect, 1)
+    for i_x, x in enumerate(range(0, WIDTH, BLOCK_SIZE)):
+        if i_x%2 ==0:
+            for i_y, y in enumerate(range(0, HEIGHT, BLOCK_SIZE)):
+                if i_y%2 ==0:
+                    rect = Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
+                    pygame.draw.rect(surface, (167, 209, 61), rect)
 
 Positions = namedtuple("Positions" , 'x, y')
 BodyOrientation = namedtuple("BodyOrientation", 'x, y')
@@ -140,9 +143,9 @@ class Snake(object):
             self.game_over = True
         
         #* Collision with wall
-        if self.head.x not in range(-BLOCK_SIZE, WIDTH+BLOCK_SIZE):
+        if self.head.x > WIDTH or self.head.x <0:
             self.game_over = True
-        if self.head.y not in range(-BLOCK_SIZE, HEIGHT+BLOCK_SIZE):
+        if self.head.y > WIDTH or self.head.y <0:
             self.game_over = True
 
     def _place_food(self):
@@ -153,6 +156,7 @@ class Snake(object):
             self._place_food()
 
     def _draw_snake(self):
+        
         HEAD_IMAGES = {
             Direction.RIGHT: HEAD_RIGHT,
             Direction.LEFT: HEAD_LEFT,
@@ -166,26 +170,48 @@ class Snake(object):
             (-1, 0): TAIL_LEFT,
             (1, 0): TAIL_RIGHT
         }
+
+
         for index, pt in enumerate(self.snake):
-            print(index)
             rect_snake = Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE)
-            if index == 0:
+            if index == 0: # Add Head
                 surface.blit(HEAD_IMAGES[self.direction], rect_snake)
+
             elif index == len(self.snake)-1: # Add tail
                 vector = ((pt.x-self.snake[index-1].x)// BLOCK_SIZE,
                           (pt.y-self.snake[index-1].y)//BLOCK_SIZE)
-                print(vector)
                 surface.blit(TAIL_IMAGES[vector], rect_snake)
-            else:
-                # TODO: Ver o bloco anterior e posterior
-                # TODO: Se X for o mesmo é Horizoltal
-                # TODO: Se y for o mesmo é vertical
-                pygame.draw.rect(surface, GREEN, rect_snake)
-
+            else: # add Body
+                previous_block = self.snake[index+1]
+                previous_block_x  = (previous_block.x - pt.x)// BLOCK_SIZE
+                previous_block_y = (previous_block.y - pt.y) // BLOCK_SIZE
                 
+                next_block = self.snake[index -1]
+                next_block_x = (next_block.x - pt.x) // BLOCK_SIZE
+                next_block_y = (next_block.y - pt.y) // BLOCK_SIZE
+
+                if previous_block.x == next_block.x:
+                    surface.blit(BODY_VERTICAL, rect_snake)
+
+                elif previous_block.y == next_block.y:
+                    surface.blit(BODY_HORIZONTAL, rect_snake)
+
+                else: 
+                    body_part = BODY_TOP_LEFT
+                    if previous_block_x == -1 and next_block_y == -1 or previous_block_y == -1 and next_block_x == -1:
+                        body_part = BODY_TOP_LEFT
+                    if previous_block_x == -1 and next_block_y == 1 or previous_block_y == 1 and next_block_x == -1:
+                        body_part = BODY_BOTTOM_LEFT
+                    if previous_block_x == 1 and next_block_y == -1 or previous_block_y == -1 and next_block_x == 1:
+                        body_part = BODY_TOP_RIGHT
+                    if previous_block_x == 1 and next_block_y == 1 or previous_block_y == 1 and next_block_x == 1:
+                        body_part = BODY_BOTTOM_RIGHT
+                
+                    surface.blit(body_part, rect_snake)
 
     def _update_ui(self):
         surface.fill(GREEN_DARKER)
+        draw_grid()
 
         # Update Score label 
         score_label = FONT.render(f"Score: {self.score}", True, WHITE)
