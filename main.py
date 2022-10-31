@@ -1,12 +1,6 @@
-from calendar import leapdays
-from email.quoprimime import body_check
-from pickle import TRUE
-from random import random
 from enum import Enum
 from collections import namedtuple
 import random
-from select import select
-from tkinter import W, Widget
 import pygame
 from pygame.locals import *
 
@@ -74,7 +68,7 @@ surface = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def draw_grid():
     for i_x, x in enumerate(range(0, WIDTH, BLOCK_SIZE)):
-        if i_x%2 ==0:
+        if i_x%2 == 0:
             for i_y, y in enumerate(range(0, HEIGHT, BLOCK_SIZE)):
                 if i_y%2 ==0:
                     rect = Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
@@ -83,7 +77,7 @@ def draw_grid():
 Positions = namedtuple("Positions" , 'x, y')
 BodyOrientation = namedtuple("BodyOrientation", 'x, y')
 class Direction(Enum):
-    UP = 1
+    UP = 1 #
     DOWN = 2
     LEFT = 3
     RIGHT= 4
@@ -97,6 +91,7 @@ class Snake(object):
         self.head = Positions(x, y)
         self.snake = [self.head]
         self.direction = Direction.RIGHT
+        
         # Fruit
         self.fruit = Positions(0, 0)
         self._place_food()
@@ -106,13 +101,13 @@ class Snake(object):
         self.score = 0
     
     def _update_direction(self, key_pressed):
-        if key_pressed in [K_w, K_UP] and self.direction != Direction.DOWN:
+        if key_pressed in [K_w, K_UP] and self.direction is not Direction.DOWN:
                 self.direction = Direction.UP
-        if key_pressed in [K_s, K_DOWN] and self.direction != Direction.UP:
+        if key_pressed in [K_s, K_DOWN] and self.direction is not Direction.UP:
             self.direction = Direction.DOWN
-        if key_pressed in [K_a, K_LEFT] and self.direction != Direction.RIGHT:
+        if key_pressed in [K_a, K_LEFT] and self.direction is not Direction.RIGHT:
             self.direction = Direction.LEFT
-        if key_pressed in [K_d, K_RIGHT] and self.direction != Direction.LEFT:
+        if key_pressed in [K_d, K_RIGHT] and self.direction is not Direction.LEFT:
             self.direction = Direction.RIGHT
 
     def _move(self):
@@ -145,7 +140,7 @@ class Snake(object):
         #* Collision with wall
         if self.head.x > WIDTH or self.head.x <0:
             self.game_over = True
-        if self.head.y > WIDTH or self.head.y <0:
+        if self.head.y > HEIGHT or self.head.y <0:
             self.game_over = True
 
     def _place_food(self):
@@ -223,9 +218,9 @@ class Snake(object):
         # Draw Fruit
         rect_fruit = Rect(self.fruit.x, self.fruit.y, BLOCK_SIZE, BLOCK_SIZE)
         surface.blit(FRUIT_IMG, rect_fruit)
-        #pygame.draw.rect(surface, GREEN, rect_fruit)
+        
 
-        CLOCK.tick(15)
+        CLOCK.tick(10)
         pygame.display.flip()
 
     def play_step(self):
